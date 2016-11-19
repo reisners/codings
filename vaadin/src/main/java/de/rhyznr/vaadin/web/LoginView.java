@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -17,9 +18,22 @@ public class LoginView extends LoginForm implements View {
 	
 	public final static String VIEW_NAME = "Login";
 	
+	@Autowired
+	private Presenter presenter;
+	
 	@PostConstruct
 	public void init() {
+		
 		setCaption("Login");
+		addLoginListener(new LoginListener() {
+
+			@Override
+			public void onLogin(LoginEvent event) {
+				log.info("login attempt with username "+event.getLoginParameter("username")+" password "+event.getLoginParameter("password"));
+				presenter.login(event.getLoginParameter("username"), event.getLoginParameter("password"));
+			}
+			
+		});
 	}
 	
 	@Override

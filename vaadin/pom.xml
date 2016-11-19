@@ -46,6 +46,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.vaadin.spring.addons/vaadin-spring-addon-i18n -->
+		<dependency>
+		    <groupId>org.vaadin.spring.addons</groupId>
+		    <artifactId>vaadin-spring-addon-i18n</artifactId>
+		    <version>0.0.7.RELEASE</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

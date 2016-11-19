@@ -16,7 +16,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @SpringUI
 @Theme("valo")
-public class ApplicationUI extends UI {
+public class ApplicationUI extends UI implements MainView {
 
 	@Value("${window.title:Application UI}")
 	private String windowTitle;
@@ -38,5 +38,10 @@ public class ApplicationUI extends UI {
 
 		Navigator navigator = new Navigator(this, viewDisplay);
 		navigator.addProvider(viewProvider);
+	}
+
+	@Override
+	public void showAnother() {
+		getNavigator().navigateTo(AnotherView.VIEW_NAME);
 	}
 }
