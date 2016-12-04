@@ -4,3 +4,4 @@ pom.xml.releaseBackup
 pom.xml.next
 release.properties
 de.syngenio.collaboration/target
+springtest.parallel
