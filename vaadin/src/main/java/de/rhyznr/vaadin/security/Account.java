@@ -1,16 +1,19 @@
 package de.rhyznr.vaadin.security;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 @Entity
 public class Account {
 	@Id
 	private String username;
 	private String password;
-	private String roles;
+	@ManyToMany
+	private Set<Authority> authorities = new HashSet<>();
 
 	public String getUsername() {
 		return username;
@@ -18,6 +21,11 @@ public class Account {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+	
+	public Account withUsername(String userrname) {
+		setUsername(userrname);
+		return this;
 	}
 
 	public String getPassword() {
@@ -28,11 +36,16 @@ public class Account {
 		this.password = password;
 	}
 
-	public String getRoles() {
-		return roles;
+	public Set<Authority> getAuthorities() {
+		return authorities;
 	}
 
-	public void setRoles(String roles) {
-		this.roles = roles;
+	public void setAuthorities(Set<Authority> authorities) {
+		this.authorities = authorities;
+	}
+	
+	public Account withAuthority(Authority authority) {
+		getAuthorities().add(authority);
+		return this;
 	}
 }

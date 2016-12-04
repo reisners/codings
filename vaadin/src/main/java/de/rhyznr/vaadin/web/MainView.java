@@ -8,4 +8,5 @@ public interface MainView {
 	void showAnother();
 	void reinitializeSession();
 	void showLoginView();
+	void showLoggedInUser();
 }

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Profile("SECURITY_MOCKED")
@@ -19,17 +20,23 @@ public class AuthenticationProviderMock implements AuthenticationProvider {
  
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Account myUser = getUser(authentication.getPrincipal().toString());
+        Account myUser = getAccount(authentication.getPrincipal());
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                 = new UsernamePasswordAuthenticationToken(myUser, "", mockGrantedAuthorities());
         usernamePasswordAuthenticationToken.setDetails(myUser);
         return usernamePasswordAuthenticationToken;
     }
  
-    private Account getUser(String principal) {
-        Account account = new Account();
-        account.setUsername(principal);
-		return account;
+    private Account getAccount(Object principal) throws AuthenticationException {
+    	if (principal != null && principal instanceof String) {
+    		switch ((String)principal) {
+    		case "uuser":
+    			return new Account().withUsername("uuser").withAuthority(new Authority().withName("ROLE_USER"));
+			case "aadmin":
+				return new Account().withUsername("aadmin").withAuthority(new Authority().withName("ROLE_ADMIN"));
+    		}
+    	}
+    	throw new UsernameNotFoundException("error.invalid.username.password");
     }
  
     @Override

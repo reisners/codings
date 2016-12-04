@@ -7,7 +7,6 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.i18n.I18N;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringUI;
@@ -51,9 +50,11 @@ public class ApplicationUI extends UI implements MainView {
 		loggedInUser = new Label();
 		loggedInUser.setSizeUndefined();
 		Button logout = new Button(i18n.get("button.logout", "Logout"));
+		logout.addClickListener(event -> presenter.onLogoutButtonPressed());
 		final HorizontalLayout header = new HorizontalLayout(loggedInUser, logout);
+		header.addStyleName("header");
 		header.setExpandRatio(loggedInUser, 1);
-		header.setComponentAlignment(loggedInUser, Alignment.MIDDLE_RIGHT);
+		header.setComponentAlignment(loggedInUser, Alignment.BOTTOM_RIGHT);
 		header.setExpandRatio(logout, 0);
 		header.setSpacing(true);
 		header.setHeightUndefined();
@@ -81,8 +82,9 @@ public class ApplicationUI extends UI implements MainView {
 		getNavigator().navigateTo(LoginView.VIEW_NAME);
 	}
 
-	private void showLoggedInUser() {
-		loggedInUser.setCaption(presenter.getLoggedInUser());
+	@Override
+	public void showLoggedInUser() {
+		loggedInUser.setCaption(presenter.getLoggedInUser().orElse(""));
 	}
 
 	@Override
