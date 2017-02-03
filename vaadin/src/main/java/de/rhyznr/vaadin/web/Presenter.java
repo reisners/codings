@@ -12,12 +12,52 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.vaadin.spring.events.EventBus;
 
-import de.rhyznr.vaadin.security.Account;
+import de.rhyznr.vaadin.security.SecurityUtils;
 
 @Component
 @Lazy
 public class Presenter {
+
+	public class ErrorViewEvent {
+
+		private String messageKey;
+		private String[] messageParameters;
+		private String buttonCaptionKey;
+		private Runnable buttonClickHandler;
+
+		
+		public ErrorViewEvent(String messageKey, String[] messageParameters, String buttonCaptionKey, Runnable buttonClickHandler) {
+			super();
+			this.messageKey = messageKey;
+			this.messageParameters = messageParameters;
+			this.buttonCaptionKey = buttonCaptionKey;
+			this.buttonClickHandler = buttonClickHandler;
+		}
+
+		public String getMessageKey() {
+			return messageKey;
+		}
+
+		public String[] getMessageParameters() {
+			return messageParameters;
+		}
+
+		public String getButtonCaptionKey() {
+			return buttonCaptionKey;
+		}
+
+		public Runnable getButtonClickHandler() {
+			return buttonClickHandler;
+		}
+	}
+	public class AcknowledgeErrorEvent {
+
+	}
+	public class UserSessionEndedEvent {}
+	public class UserSessionStartedEvent {}
+	public static class ReinitializeSessionEvent {}
 
 	private static final Logger log = LoggerFactory.getLogger(Presenter.class);
 	
@@ -26,6 +66,9 @@ public class Presenter {
 	@Autowired 
 	AuthenticationManager authenticationManager;
 	
+    @Autowired
+    EventBus.UIEventBus eventBus;
+
 	public Presenter(MainView mainView) {
 		this.mainView = mainView;
 	}
@@ -33,43 +76,46 @@ public class Presenter {
 	public void onUsernamePasswordEntered(String username, String password) throws AuthenticationException {
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 		Authentication authentication = authenticationManager.authenticate(token);
-		mainView.reinitializeSession();
+		eventBus.publish(this, new Presenter.ReinitializeSessionEvent());
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		log.info("user "+username+" successfully logged in");
-		onInit();
+		eventBus.publish(this, new UserSessionStartedEvent());
 	}
 
 	public boolean isUserAuthenticated() {
-		return SecurityContextHolder.getContext().getAuthentication() != null;
+		return getAuthentication() != null;
 	}
 
 	public Optional<String> getLoggedInUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Authentication authentication = getAuthentication();
 		if (authentication != null) {
-			Object principal = authentication.getPrincipal();
-			Account account = (Account) principal;
-			String username = account.getUsername();
-			return Optional.of(username);
+			return Optional.of(SecurityUtils.getPrincipal(authentication).getUsername());
 		} else {
 			return Optional.empty();
 		}
 	}
-	
-	public void onInit() {
-		mainView.showLoggedInUser();
-		if (getLoggedInUser().isPresent()) {
-			mainView.showAnother();
-		} else {
-			mainView.showLoginView();
-		}
-	}
 
+	public Authentication getAuthentication() {
+		return SecurityContextHolder.getContext().getAuthentication();
+	}
+	
 	public void onLogoutButtonPressed() {
 		getLoggedInUser().ifPresent(username -> {
 			SecurityContextHolder.getContext().setAuthentication(null);
 			log.info("user "+username+" logged off");
-			onInit();
+			eventBus.publish(this, new UserSessionEndedEvent());
 		});
+	}
+
+	public void onErrorBackButtonClicked() {
+		eventBus.publish(this, new AcknowledgeErrorEvent());
+	}
+
+	public void onEnterErrorView(String viewName) {
+		// find out what the problem is
+		if (!isUserAuthenticated()) {
+			eventBus.publish(this, new ErrorViewEvent("error.not.logged.in", new String[] {}, "button.to.login", () -> eventBus.publish(Presenter.this, new UserSessionEndedEvent())));
+		}
 	}
 
 	

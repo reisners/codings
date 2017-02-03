@@ -2,6 +2,7 @@ package de.rhyznr.vaadin.security;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +24,7 @@ public class AuthenticationProviderMock implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Account myUser = getAccount(authentication.getPrincipal());
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                = new UsernamePasswordAuthenticationToken(myUser, "", mockGrantedAuthorities());
+                = new UsernamePasswordAuthenticationToken(myUser, "", mockGrantedAuthorities(myUser));
         usernamePasswordAuthenticationToken.setDetails(myUser);
         return usernamePasswordAuthenticationToken;
     }
@@ -44,7 +46,8 @@ public class AuthenticationProviderMock implements AuthenticationProvider {
         return true;
     }
  
-    private List<GrantedAuthority> mockGrantedAuthorities() {
-        return Collections.emptyList();
+    private List<GrantedAuthority> mockGrantedAuthorities(Account account) {
+    	List<String> roles = account.getAuthorities().stream().map(authority -> authority.getName()).collect(Collectors.toList());
+		return AuthorityUtils.createAuthorityList(roles.toArray(new String[] {}));
     }
 }

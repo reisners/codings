@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 public interface MainView {
 	
 	void showAnother();
-	void reinitializeSession();
 	void showLoginView();
 	void showLoggedInUser();
 }

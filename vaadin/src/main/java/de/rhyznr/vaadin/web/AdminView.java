@@ -11,21 +11,20 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.VerticalLayout;
 
-@SpringView(name = AnotherView.VIEW_NAME)
-@SecuredView(requiredRoles = {"ROLE_USER"})
-public class AnotherView extends VerticalLayout implements ApplicationView {
+@SpringView(name = AdminView.VIEW_NAME)
+@SecuredView(requiredRoles = {"ROLE_ADMIN"})
+public class AdminView extends VerticalLayout implements ApplicationView {
 
-	public final static String VIEW_NAME = "another";
+	public final static String VIEW_NAME = "admin";
 	
 	@Autowired
 	I18N i18n;
 	
 	@PostConstruct
 	public void init() {
-		setCaption(i18n.get("another.view.caption", "Another View"));
-		Button btn = new Button(i18n.get("button.clickMe", "Click me"));
-		btn.addStyleName("primary");
-		btn.setId("abc123");
+		setCaption(i18n.get("admin.view.caption", "Admin View"));
+		Button btn = new Button(i18n.get("button.clickMe", "Dangerous Button"));
+		btn.addStyleName("danger");
 		addComponent(btn);
 	}
 	
